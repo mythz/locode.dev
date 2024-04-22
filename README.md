@@ -1,2 +1,8 @@
-# locode.dev
-locode.dev website
+```
+npm install
+npm run dev
+```
+
+```
+npm run deploy
+```
