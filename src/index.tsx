@@ -1,3 +1,5 @@
+import manifest from '__STATIC_CONTENT_MANIFEST'
+import { serveStatic } from 'hono/cloudflare-workers'
 import { BlankInput } from 'hono/types'
 import { Context, Hono } from 'hono'
 
@@ -23,6 +25,20 @@ type Variables = {
 
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+
+// Doesn't work
+//app.get('/static/*', serveStatic({ root: './', manifest }))
+
+const staticFiles = [
+  '/robots.txt',
+  '/logo.svg',
+  '/sitemap.xml',
+  '/sitemaps/sitemap.xml',
+  '/sitemaps/sitemap-questions.xml',
+  '/sitemaps/sitemap-tags.xml',
+]
+staticFiles.forEach(x => app.get(x, serveStatic({ path: `.${x}`, manifest })))
+
 
 const cache = caches.default
 
@@ -60,8 +76,8 @@ const pagingInfo = (c:AppContext) => {
   return { q, tab, skip, take, page, pageSize }
 }
 
+
 app.get('/', async c => {
-  console.log('c.env', Object.keys(c.env), Object.values(c.env))
   return cacheResponse(c, async c => {
     const client = pvqGateway(c)
     let { tab, skip, take } = pagingInfo(c)

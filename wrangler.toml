@@ -3,6 +3,9 @@ compatibility_date = "2023-12-01"
 account_id = "b95f38ca3a6ac31ea582cd624e6eb385"
 workers_dev = true
 
+[site]
+bucket = "./assets"
+
 [vars]
 BASE_URL = "http://mythz.pvq.app"
 MAX_AGE = 10
