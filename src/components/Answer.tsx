@@ -18,7 +18,7 @@ export default ({ question, answer }: Props) => {
     const grade = gradeLetter(votes)
 
     function getAnswerScore(answerId:string) {
-        const stat = question.meta.statTotals?.find(x => x.id === answerId)
+        const stat = question.meta?.statTotals?.find(x => x.id === answerId)
         return !stat ? 1 : stat.startingUpVotes + stat.upVotes - stat.downVotes
     }
     
@@ -27,7 +27,7 @@ export default ({ question, answer }: Props) => {
     }
     
     function getAnswerComments(answerId: string) {
-        return question.meta.answerComments?.[answerId] ?? []
+        return question.meta?.comments?.[answerId] ?? []
     }
 
     return (<article data-answer={answerId} data-createdby={userName} className="py-8 border-b border-gray-200 dark:border-gray-700">
