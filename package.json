@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev": "wrangler dev --remote src/index.tsx",
-    "deploy": "wrangler deploy --minify src/index.tsx"
+    "build": "wrangler build src/index.tsx",
+    "deploy": "npx wrangler deploy --minify --outdir dist src/index.tsx"
   },
   "dependencies": {
     "@servicestack/client": "^2.1.5",
@@ -11,8 +12,6 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403.0",
-    "@iconify/react": "^4.1.1",
-    "@types/bun": "^1.1.0",
     "wrangler": "^3.47.0"
   }
 }

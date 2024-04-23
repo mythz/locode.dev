@@ -31,7 +31,7 @@ type CacheOptions = {
   maxAge?: number
 }
 
-async function cacheResponse(c: AppContext, fn: (c: AppContext) => Response | Promise<Response>, options: CacheOptions = {}) {
+async function cacheResponse(c:AppContext, fn: (c:AppContext) => Response | Promise<Response>, options: CacheOptions = {}) {
   let request = c.req.raw as Request
   let response = await cache.match(request)
   if (response) {

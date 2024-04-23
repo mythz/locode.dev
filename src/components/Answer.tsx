@@ -1,19 +1,11 @@
 import { getAvatarUrl, toHumanReadable, createGradeDataUri, gradeLetter, modelToUser } from "../utils"
 import { renderMarkdown } from "../markdown"
-import { Answer } from "../dtos"
+import { Answer, QuestionAndAnswers } from "../dtos"
 import PostComments from "./PostComments"
 
 type Props = {
     question: QuestionAndAnswers
     answer: Answer
-}
-
-function getAnswerScore(answerId: string) {
-    return 1
-}
-
-function getReputation(userName: string) {
-    return 1
 }
 
 export default ({ question, answer }: Props) => {
@@ -25,6 +17,15 @@ export default ({ question, answer }: Props) => {
     const gradedBy = answer.gradedBy?.[userName]
     const grade = gradeLetter(votes)
 
+    function getAnswerScore(answerId:string) {
+        const stat = question.meta.statTotals?.find(x => x.id === answerId)
+        return !stat ? 1 : stat.startingUpVotes + stat.upVotes - stat.downVotes
+    }
+    
+    function getReputation(userName:string) {
+        return ''
+    }
+    
     function getAnswerComments(answerId: string) {
         return question.meta.answerComments?.[answerId] ?? []
     }
