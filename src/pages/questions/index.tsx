@@ -1,4 +1,4 @@
-import { setQueryString } from '@servicestack/client'
+import { setQueryString, ucFirst } from '@servicestack/client'
 import { ErrorSummary, Loading } from '../../components/Form'
 import Layout from '../../components/Layout'
 import QuestionViewTabs from '../../components/QuestionViewTabs'
@@ -16,7 +16,9 @@ export default ({ q, tab, page, pageSize, results, total, responseStatus }: Sear
 
     const path = setQueryString(`/questions`, { q, tab, page, pageSize })
 
-    const title = 'Questions'
+    const active = tab ?? tabs[0]
+    const title = `${ucFirst(active)} Questions`
+
     return (<Layout title={title}>
     <div class="pt-12 pb-24 md:grid md:grid-cols-8 md:gap-x-8 max-w-screen-xl mx-auto">
         <div class="md:col-span-6">
@@ -37,7 +39,7 @@ export default ({ q, tab, page, pageSize, results, total, responseStatus }: Sear
                                     <div class="mb-4">
                                         <PrimaryButton href="https://pvq.app/questions/ask">Ask Question</PrimaryButton>
                                     </div>
-                                    <QuestionViewTabs path={path} tabs={tabs} active={tab || tabs[0]} />
+                                    <QuestionViewTabs path={path} tabs={tabs} active={active} />
                                 </div>
                             </div>
 

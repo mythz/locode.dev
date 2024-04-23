@@ -21,6 +21,7 @@ type Variables = {
   LONG_MAX_AGE: number
 }
 
+
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
 const cache = caches.default
@@ -45,34 +46,46 @@ async function cacheResponse(c: AppContext, fn: (c: AppContext) => Response | Pr
   }
 }
 
-const maxAge = (c:AppContext) => ({ maxAge: c.env.MAX_AGE ?? 10 })
-const longMaxAge = (c:AppContext) => ({ maxAge: c.env.LONG_MAX_AGE ?? 10 })
+const maxAge = (c:AppContext) => ({ maxAge: c.env.MAX_AGE ?? 11 })
+const longMaxAge = (c:AppContext) => ({ maxAge: c.env.LONG_MAX_AGE ?? 11 })
+const pvqGateway = (c:AppContext) => new PvqGateway(c.env.BASE_URL ?? "http://mythz.pvq.app")
+const pvqBucket = (c:AppContext) => new R2(c.env.PVQ_BUCKET)
+const pagingInfo = (c:AppContext) => {
+  let { q, tab, page, pageSize } = c.req.query()
+  pageSize = parseInt(pageSize) || 25
+  page = parseInt(page) || 1
+  const take = Math.min(pageSize, 50)
+  const skip = isNaN(page) ? 1 : page * take
+  // console.log('pagingInfo', { q, tab, skip, take, page, pageSize })
+  return { q, tab, skip, take, page, pageSize }
+}
 
 app.get('/', async c => {
+  console.log('c.env', Object.keys(c.env), Object.values(c.env))
   return cacheResponse(c, async c => {
-    const client = new PvqGateway(c.env.BASE_URL)
-    let { tab, page, pageSize } = c.req.query()
-    const api = await client.search({ tab, page, pageSize })
+    const client = pvqGateway(c)
+    let { tab, skip, take } = pagingInfo(c)
+    const api = await client.search({ tab, skip, take })
     return c.html(<Home tab={tab} posts={api.response.results} />)
   }, maxAge(c))
 })
 
 app.get('/questions', async c => {
   return cacheResponse(c, async c => {
-    const client = new PvqGateway(c.env.BASE_URL)
-    let { q, tab, page, pageSize } = c.req.query()
-    const api = await client.search({ q, tab, page, pageSize })
+    const client = pvqGateway(c)
+    let { q, tab, skip, take, page, pageSize } = pagingInfo(c)
+    const api = await client.search({ q, tab, take, skip })
     return c.html(<Questions q={q} tab={tab} page={page} pageSize={pageSize} {...api.response} />)
   }, maxAge(c))
 })
 
 app.get('/questions/tagged/:tag', async c => {
+  const tag = c.req.param('tag')
   return cacheResponse(c, async c => {
-    const client = new PvqGateway(c.env.BASE_URL)
-    let { tab, page, pageSize } = c.req.query()
-    const tag = c.req.param('tag')
+    const client = pvqGateway(c)
+    let { tab, skip, take, page, pageSize } = pagingInfo(c)
     const q = `[${decodeURIComponent(tag)}]`
-    const api = await client.search({ q, tab, page, pageSize })
+    const api = await client.search({ q, tab, skip, take })
     return c.html(<QuestionsTagged tag={tag} tab={tab} page={page} pageSize={pageSize} {...api.response} />)
   }, maxAge(c))
 })
@@ -81,7 +94,7 @@ app.get('/questions/:id{[0-9]+}/:slug', (c) => {
   const id = c.req.param('id')
 
   return cacheResponse(c, async c => {
-    const r2 = new R2(c.env.PVQ_BUCKET)
+    const r2 = pvqBucket(c)
     const { questionPath, metaPath, questionDir, fileId } = idParts(id)
     const prefix = `${questionDir}/${fileId}.`
 

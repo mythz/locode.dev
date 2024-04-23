@@ -44,7 +44,7 @@ export default ({ tag, tab, page, pageSize, results, total, responseStatus }: Se
                             </>)
 
                             : (<div class="mt-8 text-lg">
-                                There are no questions tagged with <b class="ml-2 inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900 px-2 py-1 text-sm font-medium text-blue-700 dark:text-blue-200 ring-1 ring-inset ring-blue-700/10">@Slug</b>
+                                There are no questions tagged with <b class="ml-2 inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900 px-2 py-1 text-sm font-medium text-blue-700 dark:text-blue-200 ring-1 ring-inset ring-blue-700/10">{tag}</b>
                             </div>)}
 
                     </div>)
