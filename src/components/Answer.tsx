@@ -9,7 +9,7 @@ type Props = {
 }
 
 export default ({ question, answer }: Props) => {
-    
+
     const userName = modelToUser(answer.model)
     const answerId = `${question.id}-${userName}`
     const votes = answer.modelVotes?.[userName]
@@ -17,15 +17,15 @@ export default ({ question, answer }: Props) => {
     const gradedBy = answer.gradedBy?.[userName]
     const grade = gradeLetter(votes)
 
-    function getAnswerScore(answerId:string) {
+    function getAnswerScore(answerId: string) {
         const stat = question.meta?.statTotals?.find(x => x.id === answerId)
         return !stat ? 1 : stat.startingUpVotes + stat.upVotes - stat.downVotes
     }
-    
-    function getReputation(userName:string) {
+
+    function getReputation(userName: string) {
         return ''
     }
-    
+
     function getAnswerComments(answerId: string) {
         return question.meta?.comments?.[answerId] ?? []
     }
