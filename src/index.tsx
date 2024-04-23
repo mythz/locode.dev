@@ -1,75 +1,143 @@
-import { Hono } from 'hono'
-import { Page } from './pages/page'
-import { Top } from './pages/top'
+import { BlankInput } from 'hono/types'
+import { Context, Hono } from 'hono'
+
+import Home from './pages/index'
 import Questions from './pages/questions'
+import QuestionsTagged from './pages/questions/tagged'
+import Question from './pages/questions/question'
+import MarkdownPage from './components/MarkdownPage'
 import { R2 } from './r2'
-import { JsonServiceClient } from '@servicestack/client'
-import { SearchPosts } from './dtos'
+import { PvqGateway } from './api'
+import { idParts } from './utils'
+import { Post, Meta, QuestionAndAnswers, Answer } from './dtos'
+import { lastRightPart } from '@servicestack/client'
 
 type Bindings = {
   PVQ_BUCKET: R2Bucket
 }
 type Variables = {
   BASE_URL: String
+  MAX_AGE: number
+  LONG_MAX_AGE: number
 }
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
-function createClient(baseUrl:string) {
-  console.log('baseUrl', baseUrl)
-  const client = new JsonServiceClient(baseUrl)
-  client.mode = undefined // Not Implemented
-  client.credentials = undefined // Not Implemented
-  return client
+const cache = caches.default
+
+type AppContext = Context<{ Bindings: Bindings; Variables: Variables; }, string, BlankInput>
+type CacheOptions = {
+  maxAge?: number
 }
 
-// Model
-export type Post = {
-  id: string
-  title: string
-  body: string
+async function cacheResponse(c: AppContext, fn: (c: AppContext) => Response | Promise<Response>, options: CacheOptions = {}) {
+  let request = c.req.raw as Request
+  let response = await cache.match(request)
+  if (response) {
+    return response
+  } else {
+    response = await fn(c)
+    if (options.maxAge) {
+      response.headers.append('Cache-Control', `s-maxage=${options.maxAge}`)
+    }
+    c.executionCtx.waitUntil(cache.put(request, response.clone()))
+    return response
+  }
 }
 
-const posts: Post[] = [
-  { id: '1', title: 'Good Morning', body: 'Let us eat breakfast' },
-  { id: '2', title: 'Good Afternoon', body: 'Let us eat Lunch' },
-  { id: '3', title: 'Good Evening', body: 'Let us eat Dinner' },
-  { id: '4', title: 'Good Night', body: 'Let us drink Beer' },
-  { id: '5', title: 'こんにちは', body: '昼からビールを飲みます' }
-]
+const maxAge = (c:AppContext) => ({ maxAge: c.env.MAX_AGE ?? 10 })
+const longMaxAge = (c:AppContext) => ({ maxAge: c.env.LONG_MAX_AGE ?? 10 })
 
-// Logic
-const getPosts = () => posts
-
-const getPost = (id: string) => {
-  return posts.find((post) => post.id == id)
-}
-
-// Controller
 app.get('/', async c => {
-  const posts = getPosts()
-  const r2 = new R2(c.env.PVQ_BUCKET)
-  const json = await r2.getContents('000/000/004.json')
-  return c.html(<div>
-    <Top posts={posts} />
-  </div>)
+  return cacheResponse(c, async c => {
+    const client = new PvqGateway(c.env.BASE_URL)
+    let { tab, page, pageSize } = c.req.query()
+    const api = await client.search({ tab, page, pageSize })
+    return c.html(<Home tab={tab} posts={api.response.results} />)
+  }, maxAge(c))
 })
 
 app.get('/questions', async c => {
-  console.log(c.env, )
-  const client = createClient(c.env.BASE_URL)
-  const { q, tab } = c.req.query()
-  const api = await client.api(new SearchPosts({ q, view:tab }))
-  console.log('api.response', api.response, api.error)
-
-  return c.html(<Questions {...api.response} />)
+  return cacheResponse(c, async c => {
+    const client = new PvqGateway(c.env.BASE_URL)
+    let { q, tab, page, pageSize } = c.req.query()
+    const api = await client.search({ q, tab, page, pageSize })
+    return c.html(<Questions q={q} tab={tab} page={page} pageSize={pageSize} {...api.response} />)
+  }, maxAge(c))
 })
 
-app.get('/post/:id{[0-9]+}', (c) => {
+app.get('/questions/tagged/:tag', async c => {
+  return cacheResponse(c, async c => {
+    const client = new PvqGateway(c.env.BASE_URL)
+    let { tab, page, pageSize } = c.req.query()
+    const tag = c.req.param('tag')
+    const q = `[${decodeURIComponent(tag)}]`
+    const api = await client.search({ q, tab, page, pageSize })
+    return c.html(<QuestionsTagged tag={tag} tab={tab} page={page} pageSize={pageSize} {...api.response} />)
+  }, maxAge(c))
+})
+
+app.get('/questions/:id{[0-9]+}/:slug', (c) => {
   const id = c.req.param('id')
-  const post = getPost(id)
-  if (!post) return c.notFound()
-  return c.html(<Page post={post} />)
+
+  return cacheResponse(c, async c => {
+    const r2 = new R2(c.env.PVQ_BUCKET)
+    const { questionPath, metaPath, questionDir, fileId } = idParts(id)
+    const prefix = `${questionDir}/${fileId}.`
+
+    const tasks = [
+      r2.contents(questionPath),
+      r2.contents(metaPath),
+      r2.list({ prefix }),
+    ]
+
+    const [ postJson, metaJson, answersList ] = await Promise.all(tasks)
+
+    if (!postJson || !metaJson) return c.notFound()
+
+    const post = JSON.parse(postJson) as Post
+    const meta = JSON.parse(metaJson) as Meta
+
+    const answerKeys = answersList?.objects
+      .map(x => x.key)
+      .filter(x => lastRightPart(x, '/').substring(3).startsWith('.a.')) // || x.substring('000'.length).startsWith('.h.')
+
+    const getTasks = answerKeys.map(key => r2.contents(key))
+    const answerJsons = await Promise.all(getTasks)
+    const answers = answerJsons.map(x => JSON.parse(x) as Answer)
+
+    const question = new QuestionAndAnswers({
+      id: id,      
+      post: post,
+      meta: meta,
+      viewCount: post.viewCount,
+      questionScore: post.score,
+      questionComments: meta.comments?.[id] ?? [],
+      answers,      
+    })
+
+    return c.html(<Question question={question} />)
+  }, maxAge(c))
 })
+
+app.get(`/Account/*`, c => {
+  const url = new URL(c.req.url)
+  url.protocol = 'https'
+  url.hostname = 'pvq.app'
+  return c.redirect(url.toString())
+})
+
+const Pages = [
+  { path:'/about', title: 'About locode' },
+  { path:'/privacy', title: 'Privacy Policy' },
+]
+
+for (const { path, title } of Pages) {
+  app.get(path, c => {
+    return cacheResponse(c, async c => {
+      return c.html(<MarkdownPage path={path} title={title} />)
+    }, longMaxAge(c))
+  })
+}
 
 export default app

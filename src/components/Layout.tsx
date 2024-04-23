@@ -2,15 +2,15 @@ import { html } from 'hono/html'
 import Header from './Header'
 import Footer from './Footer'
 
-export const Layout = (props: { title: string; children?: any }) => {
-    const title = props.title || 'locode.dev'
+export default (props: { title: string; children?: any }) => {
+    const title = (props.title || '') +  ' - locode.dev'
     return html`
   <!DOCTYPE html>
   <html lang="en"><head><meta charset="utf-8">
       <title>${title}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <base href="/">
-      <link rel="icon" href="https://assets.pvq.app/img/logo.svg" type="image/svg+xml" />
+      <link rel="icon" href="https://assets.pvq.app/img/locode.svg" type="image/svg+xml" />
       <link rel="stylesheet" href="https://assets.pvq.app/css/app.css" />
       <link rel="stylesheet" href="https://assets.pvq.app/css/typography.css" />
       <link rel="stylesheet" href="https://assets.pvq.app/css/highlight.css" />
@@ -18,6 +18,7 @@ export const Layout = (props: { title: string; children?: any }) => {
         window.Blazor = {
             addEventListener: function () {}
         } //Mock
+        window.BaseUrl = 'https://pvq.app'
       </script>
       <script type="importmap">
       {

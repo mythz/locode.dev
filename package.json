@@ -5,7 +5,9 @@
   },
   "dependencies": {
     "@servicestack/client": "^2.1.5",
-    "hono": "^4.2.5"
+    "highlight.js": "^11.9.0",
+    "hono": "^4.2.5",
+    "marked": "^12.0.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403.0",

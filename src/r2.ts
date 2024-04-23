@@ -23,10 +23,13 @@ export class R2 {
         this.bucket = bucket
     }
 
-    async getContents(path:string) {        
+    async contents(path:string) {        
         const object = await this.bucket.get(path)
-        console.log('object', path, object)
         if (object === null) return null
         return await object.text()
-    }    
+    }
+
+    async list(options:R2ListOptions) {
+        return await this.bucket.list(options)
+    }
 }

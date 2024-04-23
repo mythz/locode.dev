@@ -5,11 +5,11 @@ export default () => (<footer id="footer" class="bg-accent-1 dark:bg-black borde
         </div>
 
         <div class="pb-6">
-            <a href="blog" class="text-sm leading-6 text-gray-600 dark:text-gray-400 hover:underline">Blog</a>
+            <a href="https://pvq.app/blog" class="text-sm leading-6 text-gray-600 dark:text-gray-400 hover:underline">Blog</a>
         </div>
 
         <div class="pb-6">
-            <a href="posts" class="text-sm leading-6 text-gray-600 dark:text-gray-400 hover:underline">Archive</a>
+            <a href="https://pvq.app/posts" class="text-sm leading-6 text-gray-600 dark:text-gray-400 hover:underline">Archive</a>
         </div>
 
         <div class="pb-6">

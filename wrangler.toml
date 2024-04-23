@@ -1,0 +1,32 @@
+name = "locode"
+compatibility_date = "2023-12-01"
+account_id = "b95f38ca3a6ac31ea582cd624e6eb385"
+workers_dev = true
+
+[vars]
+BASE_URL = "http://mythz.pvq.app"
+MAX_AGE = 10
+LONG_MAX_AGE = 10
+
+[env.production.vars]
+BASE_URL = "https://pvq.app"
+MAX_AGE = 3600
+LONG_MAX_AGE = 86400
+
+[[r2_buckets]]
+binding = 'PVQ_BUCKET'
+bucket_name = 'pvq-prod'
+preview_bucket_name = 'pvq-dev'
+
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "my-database"
+# database_id = ""
+
+# [ai]
+# binding = "AI"
+

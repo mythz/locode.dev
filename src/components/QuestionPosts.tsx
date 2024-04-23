@@ -1,5 +1,5 @@
 import { Post } from '../dtos'
-import { formatDate, log, toHumanReadable } from '../utils'
+import { formatDate, log, toHumanReadable, getModifiedDate } from '../utils'
 
 type Props = {
     posts: Post[]
@@ -7,10 +7,6 @@ type Props = {
 
 function getHref(post: Post) {
     return `questions/${post.id}/${post.slug}`
-}
-
-function getModifiedDate(post: Post) {
-    return post.lastEditDate ?? post.creationDate
 }
 
 export default ({ posts }: Props) => (<div> 
@@ -25,7 +21,7 @@ export default ({ posts }: Props) => (<div>
                     </div>)
                     : (<>
                         <div className="text-gray-600 dark:text-gray-300 whitespace-nowrap">{toHumanReadable(post.score)} votes</div>
-                        <div className="my-2 text-center items-center rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-600/20 whitespace-nowrap">
+                        <div className="my-2 text-center items-center rounded-md bg-green-50 dark:bg-green-900 px-2 py-1 text-sm font-medium text-green-700 dark:text-green-200 ring-1 ring-inset ring-green-600/20 whitespace-nowrap">
                             <a href={getHref(post)}>
                                 {post.answerCount != 1 ? `${post.answerCount ?? 0} answers` : "1 answer"}
                             </a>

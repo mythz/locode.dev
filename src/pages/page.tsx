@@ -1,4 +1,4 @@
-import { Layout } from '../components/Layout'
+import Layout from '../components/Layout'
 import type { Post } from '../index'
 
 export const Page = (props: { post: Post }) => {
