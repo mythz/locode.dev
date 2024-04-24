@@ -1,25 +1,36 @@
 name = "locode"
 compatibility_date = "2023-12-01"
 account_id = "b95f38ca3a6ac31ea582cd624e6eb385"
-workers_dev = true
+main = "src/index.js"
 
-[site]
-bucket = "./assets"
+workers_dev = true
+route = { pattern = "dev.locode.dev/*", zone_name = "locode.dev" }
 
 [vars]
+ENVIRONMENT = "dev"
 BASE_URL = "http://mythz.pvq.app"
 MAX_AGE = 10
 LONG_MAX_AGE = 10
 
+r2_buckets = [
+    { binding = "PVQ_BUCKET", bucket_name = "pvq-dev" }
+]
+
+[env.production]
+route = { pattern = "www.locode.dev/*", zone_name = "locode.dev" }
+
+r2_buckets = [
+    { binding = "PVQ_BUCKET", bucket_name = "pvq-prod" }
+]
+
 [env.production.vars]
+ENVIRONMENT = "production"
 BASE_URL = "https://pvq.app"
 MAX_AGE = 3600
 LONG_MAX_AGE = 86400
 
-[[r2_buckets]]
-binding = 'PVQ_BUCKET'
-bucket_name = 'pvq-prod'
-preview_bucket_name = 'pvq-dev'
+[site]
+bucket = "./assets"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"

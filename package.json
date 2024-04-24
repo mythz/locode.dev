@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "wrangler dev --remote src/index.tsx",
     "build": "wrangler build src/index.tsx",
-    "deploy": "npx wrangler deploy --minify --outdir dist src/index.tsx"
+    "deploy": "npx wrangler deploy --minify --outdir dist src/index.tsx --env production"
   },
   "dependencies": {
     "@servicestack/client": "^2.1.5",
