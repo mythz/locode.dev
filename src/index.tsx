@@ -3,14 +3,15 @@ import { serveStatic } from 'hono/cloudflare-workers'
 import { BlankInput } from 'hono/types'
 import { Context, Hono } from 'hono'
 
+import MarkdownPage from './components/MarkdownPage'
 import Home from './pages/index'
+import NotFound from './pages/404'
 import Questions from './pages/questions'
 import QuestionsTagged from './pages/questions/tagged'
 import Question from './pages/questions/question'
-import MarkdownPage from './components/MarkdownPage'
 import { R2 } from './r2'
 import { PvqGateway } from './api'
-import { idParts } from './utils'
+import { idParts, modelToUser } from './utils'
 import { Post, Meta, QuestionAndAnswers, Answer } from './dtos'
 import { lastRightPart } from '@servicestack/client'
 
@@ -26,20 +27,6 @@ type Variables = {
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
-// Doesn't work
-//app.get('/static/*', serveStatic({ root: './', manifest }))
-
-const staticFiles = [
-  '/robots.txt',
-  '/logo.svg',
-  '/sitemap.xml',
-  '/sitemaps/sitemap.xml',
-  '/sitemaps/sitemap-questions.xml',
-  '/sitemaps/sitemap-tags.xml',
-]
-staticFiles.forEach(x => app.get(x, serveStatic({ path: `.${x}`, manifest })))
-
-
 const cache = caches.default
 
 type AppContext = Context<{ Bindings: Bindings; Variables: Variables; }, string, BlankInput>
@@ -47,7 +34,7 @@ type CacheOptions = {
   maxAge?: number
 }
 
-async function cacheResponse(c:AppContext, fn: (c:AppContext) => Response | Promise<Response>, options: CacheOptions = {}) {
+async function cacheResponse(c: AppContext, fn: (c: AppContext) => Response | Promise<Response>, options: CacheOptions = {}) {
   let request = c.req.raw as Request
   let response = await cache.match(request)
   if (response) {
@@ -62,11 +49,11 @@ async function cacheResponse(c:AppContext, fn: (c:AppContext) => Response | Prom
   }
 }
 
-const maxAge = (c:AppContext) => ({ maxAge: c.env.MAX_AGE ?? 11 })
-const longMaxAge = (c:AppContext) => ({ maxAge: c.env.LONG_MAX_AGE ?? 11 })
-const pvqGateway = (c:AppContext) => new PvqGateway(c.env.BASE_URL ?? "http://mythz.pvq.app")
-const pvqBucket = (c:AppContext) => new R2(c.env.PVQ_BUCKET)
-const pagingInfo = (c:AppContext) => {
+const maxAge = (c: AppContext) => ({ maxAge: c.env.MAX_AGE ?? 11 })
+const longMaxAge = (c: AppContext) => ({ maxAge: c.env.LONG_MAX_AGE ?? 11 })
+const pvqGateway = (c: AppContext) => new PvqGateway(c.env.BASE_URL ?? "http://mythz.pvq.app")
+const pvqBucket = (c: AppContext) => new R2(c.env.PVQ_BUCKET)
+const pagingInfo = (c: AppContext) => {
   let { q, tab, page, pageSize } = c.req.query()
   pageSize = parseInt(pageSize) || 25
   page = parseInt(page) || 1
@@ -120,7 +107,7 @@ app.get('/questions/:id{[0-9]+}/:slug', (c) => {
       r2.list({ prefix }),
     ]
 
-    const [ postJson, metaJson, answersList ] = await Promise.all(tasks)
+    const [postJson, metaJson, answersList] = await Promise.all(tasks)
 
     if (!postJson || !metaJson) return c.notFound()
 
@@ -135,14 +122,25 @@ app.get('/questions/:id{[0-9]+}/:slug', (c) => {
     const answerJsons = await Promise.all(getTasks)
     const answers = answerJsons.map(x => JSON.parse(x) as Answer)
 
+    const answerVotes: Record<string, number> = {}
+    answers.forEach(answer => {
+      const userName = modelToUser(answer.model)
+      const answerId = `${id}-${userName}`
+      const modelVotes = meta?.modelVotes?.[userName] ?? 0
+      const stat = meta?.statTotals?.find(x => x.id === answerId)
+      const votes = !stat ? 1 : modelVotes + stat.upVotes - stat.downVotes
+      answerVotes[answerId] = votes
+    })
+    answers.sort((a:Answer,b:Answer) => answerVotes[`${id}-${modelToUser(b.model)}`] ?? 0 - answerVotes[`${id}-${modelToUser(a.model)}`] ?? 0)
+
     const question = new QuestionAndAnswers({
-      id: id,      
+      id: id,
       post: post,
       meta: meta,
       viewCount: post.viewCount,
       questionScore: post.score,
       questionComments: meta.comments?.[id] ?? [],
-      answers,      
+      answers,
     })
 
     return c.html(<Question question={question} />)
@@ -157,8 +155,8 @@ app.get(`/Account/*`, c => {
 })
 
 const Pages = [
-  { path:'/about', title: 'About locode' },
-  { path:'/privacy', title: 'Privacy Policy' },
+  { path: '/about', title: 'About locode' },
+  { path: '/privacy', title: 'Privacy Policy' },
 ]
 
 for (const { path, title } of Pages) {
@@ -168,5 +166,16 @@ for (const { path, title } of Pages) {
     }, longMaxAge(c))
   })
 }
+
+// Doesn't work
+//app.get('/static/*', serveStatic({ root: './', manifest }))
+
+app.get('/:path{.*\\..*}', c => {
+  const path = c.req.path
+  console.log('path', path)
+  return serveStatic({ path, manifest })(c)
+})
+
+app.get('*', c => c.html(<NotFound />))
 
 export default app

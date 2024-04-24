@@ -12,15 +12,14 @@ export default ({ question, answer }: Props) => {
 
     const userName = modelToUser(answer.model)
     const answerId = `${question.id}-${userName}`
-    const votes = answer.modelVotes?.[userName]
-    const reason = answer.modelReasons?.[userName]
-    const gradedBy = answer.gradedBy?.[userName]
-    const grade = gradeLetter(votes)
 
-    function getAnswerScore(answerId: string) {
-        const stat = question.meta?.statTotals?.find(x => x.id === answerId)
-        return !stat ? 1 : stat.startingUpVotes + stat.upVotes - stat.downVotes
-    }
+    const modelVotes = question.meta?.modelVotes?.[userName] ?? 0
+    const reason = question.meta?.modelReasons?.[userName]
+    const gradedBy = question.meta?.gradedBy?.[userName]
+
+    const stat = question.meta?.statTotals?.find(x => x.id === answerId)
+    const votes = !stat ? 1 : modelVotes + stat.upVotes - stat.downVotes
+    const grade = gradeLetter(votes)
 
     function getReputation(userName: string) {
         return ''
@@ -37,7 +36,7 @@ export default ({ question, answer }: Props) => {
                     <svg className="up w-6 h-6 sm:w-10 sm:h-10 cursor-pointer select-none hover:text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <title>Up Vote</title><path fill="currentColor" d="M3 19h18a1.002 1.002 0 0 0 .823-1.569l-9-13c-.373-.539-1.271-.539-1.645 0l-9 13A.999.999 0 0 0 3 19m9-12.243L19.092 17H4.908z" />
                     </svg>
-                    <b className="score text-xl" data-score={getAnswerScore(answerId)}>{toHumanReadable(getAnswerScore(answerId))}</b>
+                    <b className="score text-xl" data-score={votes}>{toHumanReadable(votes)}</b>
                     <svg className="down w-6 h-6 sm:w-10 sm:h-10 cursor-pointer select-none hover:text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <title>Down Vote</title><path fill="currentColor" d="M21.886 5.536A1.002 1.002 0 0 0 21 5H3a1.002 1.002 0 0 0-.822 1.569l9 13a.998.998 0 0 0 1.644 0l9-13a.998.998 0 0 0 .064-1.033M12 17.243L4.908 7h14.184z" />
                     </svg>
@@ -65,7 +64,7 @@ export default ({ question, answer }: Props) => {
                                     </div>
                                     <div className="bg-gray-50 flex items-center justify-center gap-x-2.5 p-3 text-gray-900">
                                         <span>
-                                            <b>{gradedBy ?? "mixtral"}</b> gave this answer {grade === 'A' || grade === 'F' ? "an" : "a"} <b>@grade</b> grade
+                                            <b>{gradedBy ?? "mixtral"}</b> gave this answer {grade === 'A' || grade === 'F' ? "an" : "a"} <b>{grade}</b> grade
                                         </span>
                                     </div>
                                 </div>

@@ -132,7 +132,7 @@ export function gradeBgColor(grade: string) {
         : grade == 'B'
             ? '#2563eb'
             : grade == 'C'
-                ? '"#4b5563'
+                ? '#4b5563'
                 : grade == 'D'
                     ? '#dc2626'
                     : '#7f1d1d'

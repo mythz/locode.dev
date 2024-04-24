@@ -10,7 +10,7 @@ export default (props: { title: string; children?: any }) => {
       <title>${title}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <base href="/">
-      <link rel="icon" href="https://assets.pvq.app/img/locode.svg" type="image/svg+xml" />
+      <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       <link rel="stylesheet" href="https://assets.pvq.app/css/app.css" />
       <link rel="stylesheet" href="https://assets.pvq.app/css/typography.css" />
       <link rel="stylesheet" href="https://assets.pvq.app/css/highlight.css" />
