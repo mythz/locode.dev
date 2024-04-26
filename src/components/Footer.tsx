@@ -18,11 +18,13 @@ export default () => (<footer id="footer" class="bg-accent-1 dark:bg-black borde
     </nav>
 
     <div class="pb-4 text-center text-sm text-gray-600 dark:text-gray-400">
-        powered by <a class="text-sm leading-6 text-gray-600 dark:text-gray-400 hover:underline" href="https://servicestack.net/posts/net8-best-blazor">blazor vue</a>
+        Made with 
+        <span class="mx-1 text-red-500 text-xl">&hearts;</span> 
+        by <a class="text-sm leading-6 text-gray-600 dark:text-gray-400 hover:underline" href="https://servicestack.net">ServiceStack</a>
     </div>
 
     <div class="pb-4 text-center text-sm text-gray-600 dark:text-gray-400">
-        Site Design &copy; 2024 locode.dev, content licensed under <a class="text-sm leading-6 text-gray-600 dark:text-gray-400 hover:underline" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>.
+        Site Design &copy; 2024 ServiceStack, content licensed under <a class="text-sm leading-6 text-gray-600 dark:text-gray-400 hover:underline" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>.
     </div>
 
 </footer>)

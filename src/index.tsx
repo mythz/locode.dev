@@ -111,30 +111,28 @@ app.get('/questions/:id{[0-9]+}/:slug', (c) => {
 
     if (!postJson || !metaJson) return c.notFound()
 
-    const post = JSON.parse(postJson) as Post
-    const meta = JSON.parse(metaJson) as Meta
+    const post = JSON.parse(postJson as string) as Post
+    const meta = JSON.parse(metaJson as string) as Meta
 
-    const answerKeys = answersList?.objects
+    const answerKeys = (answersList as R2Objects)?.objects
       .map(x => x.key)
-      .filter(x => lastRightPart(x, '/').substring(3).startsWith('.a.')) // || x.substring('000'.length).startsWith('.h.')
+      .filter(x => lastRightPart(x, '/').substring(3).startsWith('.h.'))
 
     const getTasks = answerKeys.map(key => r2.contents(key))
     const answerJsons = await Promise.all(getTasks)
-    const answers = answerJsons.map(x => JSON.parse(x) as Answer)
+    const answers = answerJsons.map(x => JSON.parse(x!) as Post)
 
-    const answerVotes: Record<string, number> = {}
     answers.forEach(answer => {
-      const userName = modelToUser(answer.model)
+      const userName = answer.createdBy!
       const answerId = `${id}-${userName}`
       const modelVotes = meta?.modelVotes?.[userName] ?? 0
       const stat = meta?.statTotals?.find(x => x.id === answerId)
-      const votes = !stat ? 1 : modelVotes + stat.upVotes - stat.downVotes
-      answerVotes[answerId] = votes
+      answer.score = !stat ? 1 : modelVotes + stat.upVotes - stat.downVotes
     })
-    answers.sort((a:Answer,b:Answer) => answerVotes[`${id}-${modelToUser(b.model)}`] ?? 0 - answerVotes[`${id}-${modelToUser(a.model)}`] ?? 0)
+    answers.sort((a:Post,b:Post) => b.score - a.score)
 
     const question = new QuestionAndAnswers({
-      id: id,
+      id: parseInt(id),
       post: post,
       meta: meta,
       viewCount: post.viewCount,

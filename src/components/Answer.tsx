@@ -1,32 +1,30 @@
-import { getAvatarUrl, toHumanReadable, createGradeDataUri, gradeLetter, modelToUser } from "../utils"
+import { getAvatarUrl, toHumanReadable, createGradeDataUri, gradeLetter, modelToUser, formatDate } from "../utils"
 import { renderMarkdown } from "../markdown"
-import { Answer, QuestionAndAnswers } from "../dtos"
+import { Post, QuestionAndAnswers } from "../dtos"
 import PostComments from "./PostComments"
 
 type Props = {
     question: QuestionAndAnswers
-    answer: Answer
+    answer: Post
 }
 
 export default ({ question, answer }: Props) => {
 
-    const userName = modelToUser(answer.model)
+    const userName = answer.createdBy!
     const answerId = `${question.id}-${userName}`
+    const meta = question.meta!
 
-    const modelVotes = question.meta?.modelVotes?.[userName] ?? 0
-    const reason = question.meta?.modelReasons?.[userName]
-    const gradedBy = question.meta?.gradedBy?.[userName]
-
-    const stat = question.meta?.statTotals?.find(x => x.id === answerId)
-    const votes = !stat ? 1 : modelVotes + stat.upVotes - stat.downVotes
+    const reason = meta.modelReasons?.[userName]
+    const gradedBy = meta.gradedBy?.[userName]
+    const votes = answer.score
     const grade = gradeLetter(votes)
 
     function getReputation(userName: string) {
-        return ''
+        return '' //populated by question.mjs after load
     }
 
     function getAnswerComments(answerId: string) {
-        return question.meta?.comments?.[answerId] ?? []
+        return meta.comments?.[answerId] ?? []
     }
 
     return (<article data-answer={answerId} data-createdby={userName} className="py-8 border-b border-gray-200 dark:border-gray-700">
@@ -74,7 +72,7 @@ export default ({ question, answer }: Props) => {
                     : null}
 
                 <div id={`preview-${answerId}`} className="preview xl:flex-grow prose">
-                    {renderMarkdown(answer.choices[0]?.message?.content)}
+                    {renderMarkdown(answer.body!)}
                 </div>
                 <div id={`edit-${answerId}`} className="edit w-full pl-2 hidden"></div>
 
@@ -85,7 +83,7 @@ export default ({ question, answer }: Props) => {
                                 <div className="flex">
                                     <span>answered</span>
                                     <dd className="ml-1 text-gray-600 dark:text-gray-300">
-                                        <time className="ml-1" datetime="@Markdown.GetDateTimestamp(DateTimeOffset.FromUnixTimeSeconds(answer.Created).DateTime)">@Markdown.GetDateLabel(DateTimeOffset.FromUnixTimeSeconds(answer.Created).DateTime)</time>
+                                        <time className="ml-1" datetime={answer.creationDate}>{formatDate(answer.creationDate)}</time>
                                     </dd>
                                 </div>
                             </div>

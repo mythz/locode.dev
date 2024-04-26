@@ -1,6 +1,7 @@
 import { getPostLink } from "../utils"
 
 const posts = [
+    { title: "Analyzing Voting Methods", slug: "individual-voting-comparison" },
     { title: "Generating the PvQ Leaderboard", slug: "leaderboard-intro" },
     { title: "Getting Help in the Age of LLMs", slug: "pvq-intro" },
 ]

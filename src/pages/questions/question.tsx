@@ -10,7 +10,7 @@ type Props = {
 }
 
 export default ({ question, error }: Props) => (
-    <Layout title={question?.post?.title}>
+    <Layout title={question?.post?.title ?? ""}>
         <div class="pt-12 pb-24 lg:grid lg:grid-cols-8 lg:gap-x-8 max-w-screen-xl mx-auto">
             <div class="lg:col-span-6">
                 {question

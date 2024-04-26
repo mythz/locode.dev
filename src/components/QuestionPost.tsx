@@ -5,7 +5,7 @@ import PostComments from "./PostComments"
 import Answer from "./Answer"
 
 type Props = {
-    question?: QuestionAndAnswers
+    question: QuestionAndAnswers
 }
 
 export default ({ question }: Props) => {
@@ -68,7 +68,7 @@ export default ({ question }: Props) => {
                     </div>
                     <div>
                         <div id={`preview-${question.id}`} className="pb-6 preview xl:flex-grow prose">
-                            {renderMarkdown(post.body)}
+                            {renderMarkdown(post.body!)}
                         </div>
                         <div id={`edit-${question.id}`} className="edit w-full hidden"></div>
 
@@ -132,12 +132,12 @@ export default ({ question }: Props) => {
             <div id="answers" className="mt-16">
                 {question.answers.length
                     ? (<h3 className="text-2xl font-semibold">
-                        {question.answers.count} Answers
+                        {question.answers.length} Answers
                     </h3>)
                     : null}
                 <div>
 
-                    {question?.answers.length
+                    {question.answers.length
                         ? (question.answers.map(answer => <Answer question={question} answer={answer} />))
                         : null}
                 </div>

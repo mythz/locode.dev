@@ -1,5 +1,5 @@
 /* Options:
-Date: 2024-04-22 23:16:43
+Date: 2024-04-24 23:43:01
 Version: 8.22
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: https://localhost:5001
@@ -399,22 +399,6 @@ export class PageStats
     public constructor(init?: Partial<PageStats>) { (Object as any).assign(this, init); }
 }
 
-export class ChoiceMessage
-{
-    public role: string;
-    public content: string;
-
-    public constructor(init?: Partial<ChoiceMessage>) { (Object as any).assign(this, init); }
-}
-
-export class Choice
-{
-    public index: number;
-    public message: ChoiceMessage;
-
-    public constructor(init?: Partial<Choice>) { (Object as any).assign(this, init); }
-}
-
 export class Comment
 {
     public body: string;
@@ -424,20 +408,6 @@ export class Comment
     public reports?: number;
 
     public constructor(init?: Partial<Comment>) { (Object as any).assign(this, init); }
-}
-
-export class Answer
-{
-    public id: string;
-    public object: string;
-    public created: number;
-    public model: string;
-    public choices: Choice[];
-    public usage: { [index: string]: number; };
-    public temperature: number;
-    public comments: Comment[];
-
-    public constructor(init?: Partial<Answer>) { (Object as any).assign(this, init); }
 }
 
 export class PostJob
@@ -657,7 +627,7 @@ export class QuestionAndAnswers
     public id: number;
     public post: Post;
     public meta?: Meta;
-    public answers: Answer[];
+    public answers: Post[];
     public viewCount: number;
     public questionScore: number;
     public questionComments: Comment[];
