@@ -31,6 +31,8 @@ export default (props: { title: string; children?: any }) => {
         }
       }
       </script>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7236493186446536"
+      crossorigin="anonymous"></script>
       </head>
         <script type="module">
         import { useAuth, useMetadata } from "@servicestack/vue"
