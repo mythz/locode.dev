@@ -26,6 +26,8 @@ export default (props: { title: string; children?: any }) => {
             "app.mjs": "https://assets.pvq.app/mjs/app.mjs",
             "dtos.mjs": "https://assets.pvq.app/mjs/dtos.mjs",
             "vue": "https://assets.pvq.app/lib/mjs/vue.min.mjs",
+            "marked": "https://assets.pvq.app/lib/mjs/marked.min.mjs",
+            "markdown": "https://assets.pvq.app/lib/mjs/markdown.mjs",
             "@servicestack/client": "https://assets.pvq.app/lib/mjs/servicestack-client.min.mjs",
             "@servicestack/vue": "https://assets.pvq.app/lib/mjs/servicestack-vue.min.mjs"
         }
