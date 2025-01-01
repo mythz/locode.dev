@@ -13,6 +13,21 @@ type Props = {
 }
 
 export default ({ postId, tab, unsubscribe }: Props) => (<div className="w-60 lg:w-80">
+    <div class="py-2 overflow-hidden mb-4">
+        <div class="bg-white">
+            <div class="max-w-7xl px-6 lg:px-8">
+                <h2 class="text-base font-semibold text-gray-600">
+                    Sponsored By
+                    <a href="https://servicestack.net" class="ml-1 text-center font-normal text-sm text-gray-700 dark:text-indigo-300 hover:text-indigo-500">servicestack.net</a>
+                </h2>
+                <a class="flex items-center" href="https://servicestack.net">
+                    <svg class="w-12 h-12 text-gray-900 dark:text-gray-50" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="currentColor" d="M10 6c1.544 1.76 2.276 4.15 2.217 6.61c3.968 1.67 9.924 6.12 11.181 12.39H28C26.051 14.31 14.918 6.77 10 6zm-2 7c4.67 4.913.81 11.582-4 12h18.97C21.5 18.289 11.95 13.533 8 13z"></path></svg>
+                    <span class="hidden sm:block text-2xl font-bold text-gray-900 dark:text-gray-50">ServiceStack</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div class="overflow-hidden rounded-xl border border-gray-200">
         <div class="flex items-center gap-x-2 lg:gap-x-4 border-b border-gray-900/5 dark:border-gray-50/5 bg-gray-50 dark:bg-gray-900 p-3 lg:p-6">
             <svg class="h-10 w-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
